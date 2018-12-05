@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ user.username }}
+{% endblock %}
+
+{% block body %}
+<ul>
+  <li>First Name: {{ user.first_name }}</li>
+  <li>Last Name: {{ user.last_name }}</li>
+  <li>Email: {{ user.email }}</li>
+</ul>
+<section>
+  {% for item in user.feedbacks %}
+    <p>
+      <h3>{{ item.title }}</h3>
+    </p>
+    <p>
+      {{ item.content }}
+    </p>
+    <a href="/feedback/{{ item.id }}/update" role="button">Edit</a>
+    <form action="/feedback/{{ item.id }}/delete" method="post">
+      <button type="submit">Delete</button>
+    </form>
+    
+    {% endfor %}
+
+</section>
+{% endblock %}

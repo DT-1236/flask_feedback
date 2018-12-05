@@ -1,3 +1,4 @@
+from flask import session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 
@@ -39,3 +40,17 @@ class User(db.Model):
             email=email,
             first_name=first_name,
             last_name=last_name)
+
+
+class Feedback(db.Model):
+    """Feedback class for feedback"""
+
+    __tablename__ = 'feedbacks'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    username = db.Column(
+        db.String(20), db.ForeignKey('users.username', ondelete='CASCADE'))
+
+    user = db.relationship('User', backref='feedbacks')

@@ -1,6 +1,7 @@
-from flask import Flask, render_template, redirect, flash
+from flask import Flask, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import Unauthorized
 
 from models import db, connect_db, User
 from secrets import DB_URI, APP_SECRET
@@ -33,19 +34,20 @@ def display_register_form_and_handle_register_form():
     form = RegisterUser()
 
     if form.validate_on_submit():
-        db.session.add(
-            User.register(
-                **{
-                    key: value
-                    for (key, value) in form.data.items()
-                    if key != 'csrf_token'
-                }))
+        user = User.register(
+            **{
+                key: value
+                for (key, value) in form.data.items() if key != 'csrf_token'
+            })
+        db.session.add(user)
         try:
             db.session.commit()
+            session['user_id'] = user.id
+            return redirect(f'/users/{form.username.data}')
         except IntegrityError:
             form.username.errors.append("Username already exists")
             return render_template("register.html", form=form)
-        return redirect('/secret')
+
     else:
         return render_template("register.html", form=form)
 
@@ -59,7 +61,8 @@ def display_login_form_and_handle_login_form():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.validate(form.password.data):
-            return redirect("/secret")
+            session['user_id'] = user.id
+            return redirect(f'/users/{form.username.data}')
         else:
             form.username.errors.append("Invalid Username/Password")
             return render_template("login.html", form=form)
@@ -68,8 +71,40 @@ def display_login_form_and_handle_login_form():
         return render_template("login.html", form=form)
 
 
-@app.route("/secret")
-def display_secret_page():
+@app.route("/users/<username>")
+def display_secret_page(username):
     """Displays secrets to the worthy"""
 
-    return "You made it!"
+    if "user_id" not in session:
+        raise Unauthorized()
+    user = User.query.get_or_404(session['user_id'])
+    if user.username != username:
+        raise Unauthorized()
+    else:
+        return render_template('user_template.html', user=user)
+
+
+@app.route("/logout")
+def logout_user():
+    """Logs out user"""
+
+    session.clear()
+    return redirect("/")
+
+
+@app.route("users/<username>/delete", methods=['POST'])
+def delete_user(username):
+    """Deletes user"""
+
+    user = User.query.get_or_404(session['user_id'])
+    if user.username == username:
+        db.session.delete(user)
+        db.session.commit()
+        return redirect('/')
+    else:
+        raise Unauthorized()
+
+
+@app.route('users/<username>feedback/add')
+def add_feedback(username):
+    user = User.query.get_or_404(session['user_id'])
