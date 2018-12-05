@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=
+    , initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>Rithm Flask Feedback!</title>
+</head>
+<body>
+    <main class="container">
+        <h1>
+            
+            {% block title %}
+            {% endblock %}
+        </h1>
+        {% for msg in get_flashed_messages()%}
+        <div class="alert">{{msg}}</div>
+        {% endfor %}
+        {% block body %}
+        {% endblock %}
+
+    </main>
+</body>
+</html>

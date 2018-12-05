@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}
+Welcome new guy!
+{% endblock %}
+{% block body %}
+<form action="/register" method="POST">
+
+    {% include 'form.html' %}
+
+    <button class="btn btn-primary" type="submit">Initiate Yourself!</button>
+</form>
+
+{% endblock %}
