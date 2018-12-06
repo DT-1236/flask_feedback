@@ -3,9 +3,9 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import Unauthorized
 
-from models import db, connect_db, User
+from models import db, connect_db, User, Feedback
 from secrets import DB_URI, APP_SECRET
-from forms import RegisterUser, LoginUser
+from forms import RegisterUser, LoginUser, AddFeedback
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
@@ -75,13 +75,8 @@ def display_login_form_and_handle_login_form():
 def display_secret_page(username):
     """Displays secrets to the worthy"""
 
-    if "user_id" not in session:
-        raise Unauthorized()
-    user = User.query.get_or_404(session['user_id'])
-    if user.username != username:
-        raise Unauthorized()
-    else:
-        return render_template('user_template.html', user=user)
+    user = authorize(username)
+    return render_template('user_template.html', user=user)
 
 
 @app.route("/logout")
@@ -92,7 +87,7 @@ def logout_user():
     return redirect("/")
 
 
-@app.route("users/<username>/delete", methods=['POST'])
+@app.route("/users/<username>/delete", methods=['POST'])
 def delete_user(username):
     """Deletes user"""
 
@@ -105,6 +100,32 @@ def delete_user(username):
         raise Unauthorized()
 
 
-@app.route('users/<username>feedback/add')
+@app.route('/users/<username>/feedback/add', methods=['GET', 'POST'])
 def add_feedback(username):
+    user = authorize(username)
+    form = AddFeedback()
+
+    if form.validate_on_submit():
+        feedback = Feedback(title=form.title.data, content=form.content.data)
+        db.session.add(feedback)
+        db.session.commit()
+        return redirect(f'/users/{user.username}')
+    else:
+        return render_template("feedback_form.html", form=form)
+
+
+@app.route('/feedback/<feedback_id>/update', methods=['GET', 'POST'])
+def update_feedback(feedback_id):
+    feedback = Feedback.query.get_or_404(feedback_id)
+    user = authorize(feedback.user.username)
+
+
+def authorize(username):
+    import pdb
+    pdb.set_trace()
+    if "user_id" not in session:
+        raise Unauthorized()
     user = User.query.get_or_404(session['user_id'])
+    if user.username != username:
+        raise Unauthorized()
+    return user
