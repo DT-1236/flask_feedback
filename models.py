@@ -1,6 +1,7 @@
 from flask import session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from sqlalchemy.sql import expression
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -24,6 +25,7 @@ class User(db.Model):
     email = db.Column(db.String(50), unique=True, nullable=False)
     first_name = db.Column(db.String(30), nullable=False)
     last_name = db.Column(db.String(30), nullable=False)
+    is_admin = db.Column(db.Boolean, server_default=expression.false())
 
     def validate(self, input_password: str) -> bool:
         """Accepts input_password and returns boolean indicating match to password hash"""

@@ -10,6 +10,7 @@
   <li>Last Name: {{ user.last_name }}</li>
   <li>Email: {{ user.email }}</li>
 </ul>
+<a class="btn btn-primary" role="button" href="/users/{{user.username}}/feedback/add">Give use new feedback!</a>
 <section>
   {% for item in user.feedbacks %}
     <p>
@@ -18,9 +19,9 @@
     <p>
       {{ item.content }}
     </p>
-    <a href="/feedback/{{ item.id }}/update" role="button">Edit</a>
+    <a class="btn btn-secondary" href="/feedback/{{ item.id }}/update" role="button">Edit</a>
     <form action="/feedback/{{ item.id }}/delete" method="post">
-      <button type="submit">Delete</button>
+      <button class="btn my-1 btn-danger" type="submit">Delete</button>
     </form>
     
     {% endfor %}

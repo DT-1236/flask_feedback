@@ -20,7 +20,7 @@ class LoginUser(FlaskForm):
     password = PasswordField("Password", validators=[InputRequired()])
 
 
-class AddFeedback(FlaskForm):
+class FeedbackForm(FlaskForm):
     """Adds user feedback"""
 
     title = StringField(
